@@ -6,7 +6,8 @@ MVP de plateforme éducative web et API pour le contexte togolais.
 
 - inscription et connexion élève/enseignant ;
 - catalogue configurable par niveau et matière ;
-- six cours de demonstration : nombres decimaux, fractions, equations, grammaire, ecosystemes et territoires du Togo ;
+- parcours primaire (CM1-CM2), secondaire (6e a 3e) et universitaire (Licences 1 a 3) ;
+- cours de demonstration en mathematiques, francais, sciences, anglais, histoire-geographie, physique-chimie, informatique, bases de donnees et developpement web ;
 - cours, leçons et objectifs pédagogiques ;
 - quiz avec correction détaillée ;
 - progression personnelle ;

@@ -168,6 +168,129 @@ COURSE_CATALOG = (
     },
 )
 
+COURSE_CATALOG = COURSE_CATALOG + (
+    {
+        "grade": ("Primaire", "CM1"),
+        "subject": "Francais",
+        "title": "Lire et comprendre un texte",
+        "description": "Lire un recit court, trouver les informations et raconter l'essentiel.",
+        "difficulty": "Debutant",
+        "duration": 20,
+        "lessons": (
+            ("Les personnages et le lieu", "Identifier qui agit et ou se deroule l'histoire.", "Un recit repond souvent aux questions qui, ou et quand.", "Les personnages sont les acteurs de l'histoire et le lieu indique ou elle se passe.", "Quelle information indique le lieu ?", "Le decor|Le personnage|Le titre", "Le decor", "Le decor decrit le lieu de l'histoire."),
+            ("Resumer un recit", "Reformuler les evenements principaux dans l'ordre.", "Un bon resume garde les actions essentielles et respecte leur chronologie.", "On peut utiliser d'abord, ensuite et enfin pour organiser les evenements.", "Que doit garder un resume ?", "Tous les details|Les actions essentielles|Les mots difficiles", "Les actions essentielles", "Un resume conserve l'essentiel."),
+        ),
+    },
+    {
+        "grade": ("Primaire", "CM1"),
+        "subject": "Sciences",
+        "title": "Le corps humain et la sante",
+        "description": "Decouvrir les fonctions du corps et les habitudes favorables a la sante.",
+        "difficulty": "Debutant",
+        "duration": 20,
+        "lessons": (
+            ("Les besoins du corps", "Relier alimentation, eau, sommeil et activite physique.", "Le corps a besoin d'une alimentation variee, d'eau, de sommeil et de mouvement.", "Ces besoins permettent de grandir, apprendre et rester en bonne sante.", "Quel besoin aide a recuperer pendant la nuit ?", "Le sommeil|Le bruit|La poussiere", "Le sommeil", "Le sommeil permet au corps de recuperer."),
+            ("Hygiene et prevention", "Adopter des gestes simples pour limiter les maladies.", "Se laver les mains et proteger les aliments limitent la transmission de microbes.", "La prevention agit avant que la maladie apparaisse.", "Quel geste limite les microbes ?", "Se laver les mains|Partager une bouteille|Oublier de cuisiner", "Se laver les mains", "Le lavage des mains retire beaucoup de microbes."),
+        ),
+    },
+    {
+        "grade": ("Primaire", "CM2"),
+        "subject": "Culture numerique",
+        "title": "Premiers pas avec le numerique",
+        "description": "Utiliser un appareil, proteger ses donnees et rechercher une information.",
+        "difficulty": "Debutant",
+        "duration": 20,
+        "lessons": (
+            ("Materiel et fichiers", "Distinguer appareil, application et fichier.", "Un appareil execute des applications qui permettent de creer ou lire des fichiers.", "Un texte enregistre est un fichier, tandis qu'un traitement de texte est une application.", "Qu'est-ce qui contient un texte enregistre ?", "Un fichier|Un clavier|Une prise", "Un fichier", "Le fichier contient les donnees enregistrees."),
+            ("Securite en ligne", "Reconnaitre un mot de passe et une information personnelle.", "Un mot de passe doit rester secret et une information personnelle ne doit pas etre partagee sans accord.", "Demander conseil a un adulte est un bon reflexe face a un message inconnu.", "Que faut-il garder secret ?", "Son mot de passe|Le titre d'un livre|Une couleur", "Son mot de passe", "Un mot de passe protege un compte."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "4e"),
+        "subject": "Anglais",
+        "title": "Communiquer en anglais",
+        "description": "Se presenter, poser des questions et parler de ses activites quotidiennes.",
+        "difficulty": "Debutant",
+        "duration": 25,
+        "lessons": (
+            ("Se presenter", "Utiliser les expressions de base pour parler de soi.", "My name is permet de dire son nom et I am permet de donner une information sur soi.", "Une presentation peut inclure le nom, l'age et la ville.", "Comment dire 'Je m'appelle Afi' ?", "My name is Afi|I name Afi|Me is Afi", "My name is Afi", "My name is introduit son nom."),
+            ("Parler de ses habitudes", "Utiliser le present simple dans une phrase courte.", "Le present simple decrit une habitude : I study, you play, she reads.", "Avec he, she et it, le verbe prend souvent un s.", "Quelle phrase est correcte ?", "She play football|She plays football|She playing football", "She plays football", "Le verbe prend s avec she."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "3e"),
+        "subject": "Physique-Chimie",
+        "title": "Matiere et electricite",
+        "description": "Observer les etats de la matiere et comprendre un circuit simple.",
+        "difficulty": "Intermediaire",
+        "duration": 30,
+        "lessons": (
+            ("Les etats de la matiere", "Relier solide, liquide et gaz a leurs proprietes.", "Un solide garde sa forme, un liquide prend la forme du recipient et un gaz occupe l'espace disponible.", "La temperature peut provoquer un changement d'etat.", "Quel etat prend la forme du recipient ?", "Solide|Liquide|Bois", "Liquide", "Un liquide prend la forme du recipient."),
+            ("Le circuit electrique", "Identifier les elements indispensables d'un circuit ferme.", "Un circuit simple contient une source, des conducteurs et un recepteur relies en boucle fermee.", "Une boucle ouverte empeche le courant de circuler.", "Quand la lampe peut-elle s'allumer ?", "Circuit ferme|Circuit casse|Pile absente", "Circuit ferme", "La boucle fermee permet la circulation du courant."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "3e"),
+        "subject": "Informatique",
+        "title": "Algorithmique et programmation",
+        "description": "Decomposer un probleme, ecrire un algorithme et tester un programme.",
+        "difficulty": "Intermediaire",
+        "duration": 30,
+        "lessons": (
+            ("Decrire une procedure", "Ordonner des instructions pour obtenir un resultat.", "Un algorithme est une suite finie d'instructions precises qui resout un probleme.", "Les instructions doivent etre assez claires pour etre executees dans le bon ordre.", "Que contient un algorithme ?", "Des instructions ordonnees|Des couleurs seulement|Un dessin sans regle", "Des instructions ordonnees", "L'ordre des instructions produit le resultat attendu."),
+            ("Conditions et repetitions", "Utiliser si et repeter dans une solution.", "Une condition choisit une action et une repetition execute plusieurs fois une meme action.", "Ces structures rendent les programmes plus courts et adaptables.", "Quelle structure repete une action ?", "Boucle|Titre|Commentaire", "Boucle", "Une boucle repete une action."),
+        ),
+    },
+    {
+        "grade": ("Universite", "Licence 1"),
+        "subject": "Informatique",
+        "title": "Algorithmique et structures de donnees",
+        "description": "Analyser un probleme, choisir une structure et estimer la complexite.",
+        "difficulty": "Intermediaire",
+        "duration": 45,
+        "lessons": (
+            ("Complexite algorithmique", "Comparer le cout d'algorithmes avec la notation O.", "La complexite decrit l'evolution du temps ou de la memoire quand la taille des donnees augmente.", "Une recherche lineaire parcourt au plus n elements et est souvent notee O(n).", "Quelle complexite correspond a une recherche lineaire simple ?", "O(1)|O(n)|O(n2)", "O(n)", "Le nombre d'operations augmente avec n."),
+            ("Listes et piles", "Choisir une structure selon les operations necessaires.", "Une pile suit la regle dernier entre, premier sorti, tandis qu'une liste permet un parcours ordonne.", "Les structures de donnees rendent les operations explicites et testables.", "Quelle regle suit une pile ?", "Premier entre, premier sorti|Dernier entre, premier sorti|Aleatoire", "Dernier entre, premier sorti", "Une pile suit LIFO."),
+        ),
+    },
+    {
+        "grade": ("Universite", "Licence 1"),
+        "subject": "Mathematiques",
+        "title": "Algebre lineaire pour debutants",
+        "description": "Manipuler vecteurs, matrices et systemes lineaires simples.",
+        "difficulty": "Intermediaire",
+        "duration": 45,
+        "lessons": (
+            ("Vecteurs et operations", "Additionner des vecteurs et reconnaitre une combinaison lineaire.", "Un vecteur est un objet qui peut etre represente par une liste de composantes.", "L'addition se fait composante par composante.", "Comment additionner deux vecteurs ?", "Composante par composante|En divisant toujours|En supprimant les composantes", "Composante par composante", "Chaque coordonnee est additionnee avec celle de meme rang."),
+            ("Systemes lineaires", "Interpretrer une equation matricielle simple.", "Un systeme lineaire rassemble plusieurs equations dont les inconnues doivent satisfaire toutes les equations.", "La methode d'elimination transforme le systeme sans changer ses solutions.", "Que cherche-t-on dans un systeme lineaire ?", "Les valeurs des inconnues|Une couleur|Un fichier", "Les valeurs des inconnues", "La solution donne les valeurs qui verifient toutes les equations."),
+        ),
+    },
+    {
+        "grade": ("Universite", "Licence 2"),
+        "subject": "Bases de donnees",
+        "title": "Conception des bases de donnees",
+        "description": "Modeliser des donnees, ecrire des requetes et proteger leur coherence.",
+        "difficulty": "Intermediaire",
+        "duration": 45,
+        "lessons": (
+            ("Modele relationnel", "Passer des besoins metier aux tables et relations.", "Une table regroupe des lignes de meme nature et une cle identifie chaque ligne.", "Les relations relient les donnees sans repeter inutilement les informations.", "Quel element identifie une ligne ?", "Une cle primaire|Une couleur|Une image", "Une cle primaire", "La cle primaire identifie chaque enregistrement."),
+            ("Requetes SQL", "Lire et filtrer des donnees avec SELECT et WHERE.", "SELECT choisit les colonnes et WHERE filtre les lignes qui respectent une condition.", "Une requete claire exprime le besoin sans modifier les donnees par accident.", "Quelle clause filtre les lignes ?", "WHERE|FROM|SELECT", "WHERE", "WHERE ajoute une condition de filtrage."),
+        ),
+    },
+    {
+        "grade": ("Universite", "Licence 3"),
+        "subject": "Developpement web",
+        "title": "Applications web et API",
+        "description": "Construire une API, valider des donnees et servir une interface web.",
+        "difficulty": "Avance",
+        "duration": 50,
+        "lessons": (
+            ("Concevoir une API", "Definir des routes, des representations et des codes HTTP.", "Une API expose des ressources par des routes et utilise des methodes HTTP adaptees.", "GET lit une ressource, POST en cree une et les reponses indiquent le resultat.", "Quelle methode cree generalement une ressource ?", "GET|POST|TRACE", "POST", "POST est utilise pour creer une ressource."),
+            ("Valider et securiser", "Valider les entrees et separer les secrets du code.", "Une API doit valider les donnees recues, limiter les acces et garder les secrets dans l'environnement.", "La validation reduit les erreurs et les risques d'injection.", "Ou placer un secret de production ?", "Dans le code public|Dans une variable d'environnement|Dans une URL partagee", "Dans une variable d'environnement", "Les secrets ne doivent pas etre inscrits dans le code."),
+        ),
+    },
+)
+
 
 def seed_database() -> None:
     with connect() as connection:

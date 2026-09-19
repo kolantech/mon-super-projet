@@ -22,7 +22,8 @@ def test_health_and_catalog():
         assert any(course["title"] == "Comprendre les fractions" for course in catalog.json())
         assert len(catalog.json()) >= 6
         assert {subject["name"] for subject in client.get("/subjects").json()} >= {"Mathematiques", "Francais", "Sciences"}
-        assert len(client.get("/grades").json()) >= 5
+        grade_names = {grade["name"] for grade in client.get("/grades").json()}
+        assert {"CM1", "CM2", "6e", "5e", "Licence 1", "Licence 2", "Licence 3"} <= grade_names
 
 
 def test_student_pages_render_courses_and_lessons():
