@@ -339,25 +339,36 @@ def startup() -> None:
 
 
 @app.get("/", response_class=HTMLResponse)
-def home() -> str:
+def home(grade: str | None = Query(default=None)) -> str:
     with connect() as connection:
-        courses = connection.execute("""
+        query = """
             SELECT c.id, c.title, c.description, c.difficulty, c.duration_minutes,
                    g.name AS grade, s.name AS subject, COUNT(l.id) AS lesson_count
             FROM courses c
             JOIN grades g ON g.id = c.grade_id
             JOIN subjects s ON s.id = c.subject_id
             LEFT JOIN lessons l ON l.course_id = c.id
-            GROUP BY c.id
-            ORDER BY c.title
-        """).fetchall()
+            WHERE 1 = 1
+        """
+        values: list[str] = []
+        if grade:
+            query += " AND g.name = ?"
+            values.append(grade)
+        query += " GROUP BY c.id ORDER BY c.title"
+        courses = connection.execute(query, values).fetchall()
     cards = "".join(
-        f"<article class='course'><div class='course-top'><span class='tag'>{escape(row['grade'])}</span><span class='tag quiet'>{escape(row['subject'])}</span></div>"
+        f"<article class='course' data-grade='{escape(row['grade'])}'><div class='course-top'><span class='tag'>{escape(row['grade'])}</span><span class='tag quiet'>{escape(row['subject'])}</span></div>"
         f"<h3>{escape(row['title'])}</h3><p>{escape(row['description'])}</p><div class='course-meta'>{row['lesson_count']} lecons &middot; {row['duration_minutes']} min</div>"
         f"<a class='button' href='/learn/{row['id']}'>Commencer le cours</a></article>"
         for row in courses
     )
-    return f"""<!doctype html><html lang='fr'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>EDU-TOGO | Mes cours</title><style>:root{{font-family:system-ui,sans-serif;color:#173b35;background:#f7f4ec}}*{{box-sizing:border-box}}body{{margin:0}}header{{background:#173b35;color:#fff;padding:20px max(24px,7vw);display:flex;justify-content:space-between;align-items:center}}header strong{{font-family:Georgia,serif;font-size:1.3rem}}header a{{color:#f5d66b;text-decoration:none;font-weight:700}}main{{max-width:1180px;margin:auto;padding:48px 24px 80px}}.hero{{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:end;margin-bottom:48px}}.eyebrow{{color:#d86b3b;font-weight:800;letter-spacing:.12em;font-size:.75rem}}h1{{font:clamp(2.8rem,7vw,5.8rem)/.92 Georgia,serif;margin:12px 0 18px;max-width:700px}}h2{{font:2rem Georgia,serif;margin:0 0 18px}}h3{{font:1.35rem Georgia,serif;margin:14px 0 8px}}p{{line-height:1.6;color:#52625a}}.intro{{font-size:1.12rem;max-width:650px}}.stats{{background:#e9c46a;padding:28px;border-radius:8px;box-shadow:10px 10px 0 #ee8952}}.stats strong{{display:block;font:3.5rem Georgia,serif}}.courses{{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}}.course{{background:#fff;border:1px solid #d8ddd3;padding:22px;border-radius:8px;display:flex;flex-direction:column;min-height:270px;box-shadow:0 8px 18px #173b3510}}.course-top{{display:flex;gap:7px;flex-wrap:wrap}}.tag{{background:#173b35;color:#fff;border-radius:999px;padding:5px 10px;font-size:.75rem;font-weight:800}}.tag.quiet{{background:#e5efe7;color:#173b35}}.course p{{margin:0 0 14px}}.course-meta{{margin-top:auto;color:#7a877d;font-size:.85rem}}.button{{display:inline-block;background:#d86b3b;color:#fff;text-decoration:none;text-align:center;padding:11px 14px;border-radius:6px;font-weight:800;margin-top:16px}}footer{{margin-top:55px;color:#7a877d;font-size:.9rem}}@media(max-width:720px){{.hero{{grid-template-columns:1fr}}}}</style></head><body><header><strong>EDU-TOGO</strong><a href='/docs'>API &amp; docs</a></header><main><section class='hero'><div><div class='eyebrow'>ESPACE ELEVE</div><h1>Choisis ton prochain cours.</h1><p class='intro'>Des lecons courtes, des exemples clairs et un quiz pour progresser a ton rythme. Ouvre un cours pour commencer.</p></div><div class='stats'><strong>{len(courses)}</strong><span>cours disponibles dans le catalogue</span></div></section><section><h2>Tous les cours</h2><div class='courses'>{cards}</div></section><footer>EDU-TOGO &middot; apprendre, comprendre, reussir</footer></main></body></html>"""
+    class_options = "".join(
+        f"<option value='{escape(class_name)}' {'selected' if grade == class_name else ''}>{escape(class_name)}</option>"
+        for class_name in ("CP1", "CP2", "CE1", "CE2", "CM1", "CM2", "6e", "5e", "4e", "3e", "Licence 1", "Licence 2", "Licence 3")
+    )
+    empty_state = "<div class='empty'>Aucun cours n'est encore publie pour cette classe. Le catalogue sera enrichi prochainement.</div>" if not courses else ""
+    page = f"""<!doctype html><html lang='fr'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>EDU-TOGO | Mes cours</title><style>:root{{font-family:system-ui,sans-serif;color:#173b35;background:#f7f4ec}}*{{box-sizing:border-box}}body{{margin:0}}header{{background:#173b35;color:#fff;padding:20px max(24px,7vw);display:flex;justify-content:space-between;align-items:center}}header strong{{font-family:Georgia,serif;font-size:1.3rem}}header a{{color:#f5d66b;text-decoration:none;font-weight:700}}main{{max-width:1180px;margin:auto;padding:48px 24px 80px}}.hero{{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:end;margin-bottom:32px}}.eyebrow{{color:#d86b3b;font-weight:800;letter-spacing:.12em;font-size:.75rem}}h1{{font:clamp(2.8rem,7vw,5.8rem)/.92 Georgia,serif;margin:12px 0 18px;max-width:700px}}h2{{font:2rem Georgia,serif;margin:0 0 18px}}h3{{font:1.35rem Georgia,serif;margin:14px 0 8px}}p{{line-height:1.6;color:#52625a}}.intro{{font-size:1.12rem;max-width:650px}}.stats{{background:#e9c46a;padding:28px;border-radius:8px;box-shadow:10px 10px 0 #ee8952}}.stats strong{{display:block;font:3.5rem Georgia,serif}}.chooser{{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #d8ddd3;border-radius:8px;padding:14px 18px;margin-bottom:26px}}.chooser label{{font-weight:800}}select{{font:inherit;border:1px solid #b7c3b8;border-radius:6px;padding:9px 38px 9px 12px;background:#fff;color:#173b35;min-width:210px}}.courses{{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}}.course{{background:#fff;border:1px solid #d8ddd3;padding:22px;border-radius:8px;display:flex;flex-direction:column;min-height:270px;box-shadow:0 8px 18px #173b3510}}.course-top{{display:flex;gap:7px;flex-wrap:wrap}}.tag{{background:#173b35;color:#fff;border-radius:999px;padding:5px 10px;font-size:.75rem;font-weight:800}}.tag.quiet{{background:#e5efe7;color:#173b35}}.course p{{margin:0 0 14px}}.course-meta{{margin-top:auto;color:#7a877d;font-size:.85rem}}.button{{display:inline-block;background:#d86b3b;color:#fff;text-decoration:none;text-align:center;padding:11px 14px;border-radius:6px;font-weight:800;margin-top:16px}}.empty{{background:#fff;border:1px dashed #b7c3b8;padding:28px;border-radius:8px;color:#52625a}}footer{{margin-top:55px;color:#7a877d;font-size:.9rem}}@media(max-width:720px){{.hero{{grid-template-columns:1fr}}.chooser{{align-items:flex-start;flex-direction:column}}select{{width:100%}}}}</style></head><body><header><strong>EDU-TOGO</strong><a href='/docs'>API &amp; docs</a></header><main><section class='hero'><div><div class='eyebrow'>ESPACE ELEVE</div><h1>Choisis ton prochain cours.</h1><p class='intro'>Selectionne ta classe pour retrouver les cours, les lecons et les quiz adaptes a ton niveau.</p></div><div class='stats'><strong>{len(courses)}</strong><span>cours disponibles pour cette selection</span></div></section><form class='chooser' method='get' action='/'><label for='grade'>Ma classe</label><select id='grade' name='grade' onchange='this.form.submit()'><option value=''>Toutes les classes</option>{class_options}</select></form><section><h2>{escape(grade) if grade else 'Tous les cours'}</h2>{empty_state}<div class='courses'>{cards}</div></section><footer>EDU-TOGO &middot; apprendre, comprendre, reussir</footer></main></body></html>"""
+    return page
 
 
 @app.get("/learn/{course_id}", response_class=HTMLResponse)

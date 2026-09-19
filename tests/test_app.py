@@ -38,6 +38,14 @@ def test_student_pages_render_courses_and_lessons():
         assert "Valider mes reponses" in lesson_page.text
 
 
+def test_class_selector_filters_courses():
+    with TestClient(app) as client:
+        university = client.get("/?grade=Licence+1")
+        assert university.status_code == 200
+        assert "Algorithmique et structures de donnees" in university.text
+        assert "Comprendre les fractions" not in university.text
+
+
 def test_student_can_complete_lesson_and_submit_quiz():
     with TestClient(app) as client:
         registration = client.post("/auth/register", json={"name": "Afi Mensah", "email": "afi@example.com", "password": "secret123"})
