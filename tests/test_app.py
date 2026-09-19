@@ -36,6 +36,7 @@ def test_student_pages_render_courses_and_lessons():
         assert lesson_page.status_code == 200
         assert "Les fractions" in lesson_page.text
         assert "Valider mes reponses" in lesson_page.text
+        assert "/quiz.js" in lesson_page.text
 
 
 def test_class_selector_filters_courses():

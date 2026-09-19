@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
 
@@ -20,6 +20,48 @@ DATABASE_PATH = Path(os.getenv("EDUTOGO_DATABASE", ROOT / "edutogo.db"))
 TOKEN_SECRET = os.getenv("EDUTOGO_TOKEN_SECRET", "change-me-in-production")
 
 app = FastAPI(title="EDU-TOGO API", version="0.1.0", description="MVP de plateforme educative configurable pour le Togo.")
+
+
+@app.middleware("http")
+async def inject_quiz_client(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/learn/") and response.headers.get("content-type", "").startswith("text/html"):
+        body = b"".join([chunk async for chunk in response.body_iterator])
+        body = body.replace(b"<script>", b"<script src='/quiz.js'></script><script>", 1)
+        return Response(content=body, status_code=response.status_code, media_type="text/html")
+    return response
+
+
+@app.get("/quiz.js", response_class=Response)
+def quiz_client() -> Response:
+    return Response(content="""
+const authPanel = document.createElement('section');
+authPanel.className = 'auth-panel';
+authPanel.innerHTML = '<strong>Compte apprenant</strong><p>Connecte-toi pour enregistrer tes scores et ta progression.</p><div class="auth-row"><input id="student-email" type="email" placeholder="Email" required><input id="student-password" type="password" placeholder="Mot de passe" required><button id="student-login" type="button">Se connecter</button><button id="student-register" type="button">Creer un compte</button></div><output id="auth-status"></output>';
+document.querySelector('main').prepend(authPanel);
+const authStatus = document.querySelector('#auth-status');
+const token = () => localStorage.getItem('edutogo_token');
+async function submitAuth(path) {
+    const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name: 'Eleve EDU-TOGO', email: document.querySelector('#student-email').value, password: document.querySelector('#student-password').value})});
+    const result = await response.json();
+    if (!response.ok) { authStatus.textContent = result.detail || 'Connexion impossible'; return; }
+    if (path.endsWith('register')) { authStatus.textContent = 'Compte cree. Connecte-toi maintenant.'; return; }
+    localStorage.setItem('edutogo_token', result.access_token);
+    authStatus.textContent = 'Connexion reussie. Tes scores seront enregistres.';
+}
+document.querySelector('#student-login').addEventListener('click', () => submitAuth('/auth/login'));
+document.querySelector('#student-register').addEventListener('click', () => submitAuth('/auth/register'));
+document.querySelectorAll('.quiz').forEach((form) => form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const output = form.querySelector('output');
+    if (!token()) { output.textContent = 'Connecte-toi ci-dessus pour valider ce quiz.'; return; }
+    const answers = {};
+    form.querySelectorAll('input:checked').forEach((input) => { answers[input.name.slice(2)] = input.value; });
+    const response = await fetch('/lessons/' + form.dataset.lesson + '/quiz', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token()}, body: JSON.stringify({answers})});
+    const result = await response.json();
+    output.textContent = response.ok ? 'Score : ' + result.score + '% (' + result.correct + '/' + result.total + ')' : (result.detail || 'Quiz impossible');
+}));
+""", media_type="application/javascript")
 
 
 def connect() -> sqlite3.Connection:
@@ -287,6 +329,57 @@ COURSE_CATALOG = COURSE_CATALOG + (
         "lessons": (
             ("Concevoir une API", "Definir des routes, des representations et des codes HTTP.", "Une API expose des ressources par des routes et utilise des methodes HTTP adaptees.", "GET lit une ressource, POST en cree une et les reponses indiquent le resultat.", "Quelle methode cree generalement une ressource ?", "GET|POST|TRACE", "POST", "POST est utilise pour creer une ressource."),
             ("Valider et securiser", "Valider les entrees et separer les secrets du code.", "Une API doit valider les donnees recues, limiter les acces et garder les secrets dans l'environnement.", "La validation reduit les erreurs et les risques d'injection.", "Ou placer un secret de production ?", "Dans le code public|Dans une variable d'environnement|Dans une URL partagee", "Dans une variable d'environnement", "Les secrets ne doivent pas etre inscrits dans le code."),
+        ),
+    },
+)
+
+COURSE_CATALOG = COURSE_CATALOG + (
+    {
+        "grade": ("Primaire", "CP1"),
+        "subject": "Lecture",
+        "title": "Premiers mots et sons",
+        "description": "Reconnaitre les sons, lire des syllabes et comprendre des mots simples.",
+        "difficulty": "Debutant",
+        "duration": 15,
+        "lessons": (
+            ("Les voyelles", "Reconnaitre a, e, i, o et u.", "Les voyelles sont des sons que l'on peut prononcer sans bloquer l'air.", "On les retrouve dans papa, ami et moto.", "Quelle lettre est une voyelle ?", "m|a|t", "a", "a est une voyelle."),
+            ("Lire des syllabes", "Assembler une consonne et une voyelle.", "Une syllabe peut etre formee d'une consonne et d'une voyelle, comme ma ou la.", "En assemblant les sons, on peut lire des mots courts.", "Quelle syllabe peut-on lire avec m et a ?", "ma|mt|mm", "ma", "m et a forment ma."),
+        ),
+    },
+    {
+        "grade": ("Primaire", "CP2"),
+        "subject": "Mathematiques",
+        "title": "Compter et additionner jusqu'a 20",
+        "description": "Lire les nombres, comparer des quantites et effectuer de petites additions.",
+        "difficulty": "Debutant",
+        "duration": 15,
+        "lessons": (
+            ("Les nombres jusqu'a 20", "Lire et ranger les nombres dans l'ordre.", "Les nombres representent des quantites et peuvent etre ranges du plus petit au plus grand.", "Apres 9 vient 10, puis 11 et 12.", "Quel nombre vient apres 14 ?", "13|15|20", "15", "Apres 14 vient 15."),
+            ("Additionner des objets", "Calculer une somme avec des quantites simples.", "Additionner revient a reunir deux quantites pour obtenir une quantite totale.", "3 objets et 2 objets font 5 objets.", "Combien font 4 + 3 ?", "6|7|8", "7", "4 objets reunis a 3 objets donnent 7."),
+        ),
+    },
+    {
+        "grade": ("Primaire", "CE1"),
+        "subject": "Mathematiques",
+        "title": "Calcul mental et problemes",
+        "description": "Calculer rapidement et choisir une operation pour resoudre un probleme.",
+        "difficulty": "Debutant",
+        "duration": 20,
+        "lessons": (
+            ("Additions et soustractions", "Calculer des operations posees et en ligne.", "L'addition augmente une quantite et la soustraction la diminue.", "Pour 12 - 5, on retire 5 a 12 et on obtient 7.", "Combien font 15 - 6 ?", "8|9|10", "9", "15 retire de 6 donne 9."),
+            ("Comprendre un probleme", "Reperer les donnees et la question.", "Pour resoudre un probleme, on lit la situation, on choisit une operation et on verifie le resultat.", "Les mots en tout indiquent souvent une addition.", "Quelle etape vient avant le calcul ?", "Lire la question|Choisir au hasard|Effacer les donnees", "Lire la question", "Il faut comprendre la situation avant de calculer."),
+        ),
+    },
+    {
+        "grade": ("Primaire", "CE2"),
+        "subject": "Francais",
+        "title": "Ecrire des phrases",
+        "description": "Construire une phrase, utiliser la ponctuation et enrichir son vocabulaire.",
+        "difficulty": "Debutant",
+        "duration": 20,
+        "lessons": (
+            ("La phrase", "Reconnaitre une phrase complete et sa ponctuation.", "Une phrase commence par une majuscule et se termine par un signe de ponctuation.", "Une phrase raconte une idee complete.", "Par quoi commence une phrase ?", "Une majuscule|Un point|Une virgule", "Une majuscule", "La premiere lettre est une majuscule."),
+            ("Enrichir son vocabulaire", "Choisir des mots precis pour decrire une action.", "Les adjectifs donnent des informations sur les personnes, les objets et les lieux.", "Un chemin long ou une maison bleue sont des descriptions plus precises.", "Quel mot precise le nom maison ?", "court|bleue|vite", "bleue", "Bleue est un adjectif qui precise maison."),
         ),
     },
 )
