@@ -25,6 +25,18 @@ def test_health_and_catalog():
         assert len(client.get("/grades").json()) >= 5
 
 
+def test_student_pages_render_courses_and_lessons():
+    with TestClient(app) as client:
+        home = client.get("/")
+        assert home.status_code == 200
+        assert "Tous les cours" in home.text
+        course = next(course for course in client.get("/catalog").json() if course["title"] == "Comprendre les fractions")
+        lesson_page = client.get(f"/learn/{course['id']}")
+        assert lesson_page.status_code == 200
+        assert "Les fractions" in lesson_page.text
+        assert "Valider mes reponses" in lesson_page.text
+
+
 def test_student_can_complete_lesson_and_submit_quiz():
     with TestClient(app) as client:
         registration = client.post("/auth/register", json={"name": "Afi Mensah", "email": "afi@example.com", "password": "secret123"})

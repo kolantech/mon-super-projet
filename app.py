@@ -6,6 +6,7 @@ import os
 import secrets
 import sqlite3
 import time
+from html import escape
 from pathlib import Path
 from typing import Annotated
 
@@ -216,7 +217,48 @@ def startup() -> None:
 
 @app.get("/", response_class=HTMLResponse)
 def home() -> str:
-    return """<!doctype html><html lang='fr'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>EDU-TOGO</title><style>:root{font-family:Georgia,serif;color:#17251f;background:#f4f1e8}body{margin:0}header{background:#143d35;color:#fff;padding:20px 7vw}main{max-width:980px;margin:48px auto;padding:0 24px}.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:center}h1{font-size:clamp(2.6rem,7vw,5.8rem);line-height:.95;margin:0 0 20px}p{font:1.05rem/1.6 system-ui,sans-serif}.panel{background:#e9c46a;padding:28px;border-radius:8px;box-shadow:10px 10px 0 #ee8952}.panel strong{font-size:3rem;display:block}a{color:#143d35;font-weight:700}footer{margin-top:80px;font:14px system-ui,sans-serif;color:#52625a}@media(max-width:700px){.hero{grid-template-columns:1fr}.panel{margin-top:12px}}</style></head><body><header><strong>EDU-TOGO</strong><span> &middot; apprendre, comprendre, reussir</span></header><main><section class='hero'><div><p>PLATEFORME EDUCATIVE</p><h1>Le savoir avance avec toi.</h1><p>Un premier espace pour apprendre les fractions en 5e, pratiquer et mesurer ses progres. L'API est prete pour accueillir les futurs cours, examens et EDU AI.</p><p><a href='/docs'>Explorer l'API interactive &rarr;</a></p></div><div class='panel'><strong>5e</strong><span>Mathematiques<br>Comprendre les fractions<br>Quiz inclus</span></div></section><footer>MVP EDU-TOGO &middot; contenus administrables &middot; base locale SQLite</footer></main></body></html>"""
+    with connect() as connection:
+        courses = connection.execute("""
+            SELECT c.id, c.title, c.description, c.difficulty, c.duration_minutes,
+                   g.name AS grade, s.name AS subject, COUNT(l.id) AS lesson_count
+            FROM courses c
+            JOIN grades g ON g.id = c.grade_id
+            JOIN subjects s ON s.id = c.subject_id
+            LEFT JOIN lessons l ON l.course_id = c.id
+            GROUP BY c.id
+            ORDER BY c.title
+        """).fetchall()
+    cards = "".join(
+        f"<article class='course'><div class='course-top'><span class='tag'>{escape(row['grade'])}</span><span class='tag quiet'>{escape(row['subject'])}</span></div>"
+        f"<h3>{escape(row['title'])}</h3><p>{escape(row['description'])}</p><div class='course-meta'>{row['lesson_count']} lecons &middot; {row['duration_minutes']} min</div>"
+        f"<a class='button' href='/learn/{row['id']}'>Commencer le cours</a></article>"
+        for row in courses
+    )
+    return f"""<!doctype html><html lang='fr'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>EDU-TOGO | Mes cours</title><style>:root{{font-family:system-ui,sans-serif;color:#173b35;background:#f7f4ec}}*{{box-sizing:border-box}}body{{margin:0}}header{{background:#173b35;color:#fff;padding:20px max(24px,7vw);display:flex;justify-content:space-between;align-items:center}}header strong{{font-family:Georgia,serif;font-size:1.3rem}}header a{{color:#f5d66b;text-decoration:none;font-weight:700}}main{{max-width:1180px;margin:auto;padding:48px 24px 80px}}.hero{{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:end;margin-bottom:48px}}.eyebrow{{color:#d86b3b;font-weight:800;letter-spacing:.12em;font-size:.75rem}}h1{{font:clamp(2.8rem,7vw,5.8rem)/.92 Georgia,serif;margin:12px 0 18px;max-width:700px}}h2{{font:2rem Georgia,serif;margin:0 0 18px}}h3{{font:1.35rem Georgia,serif;margin:14px 0 8px}}p{{line-height:1.6;color:#52625a}}.intro{{font-size:1.12rem;max-width:650px}}.stats{{background:#e9c46a;padding:28px;border-radius:8px;box-shadow:10px 10px 0 #ee8952}}.stats strong{{display:block;font:3.5rem Georgia,serif}}.courses{{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}}.course{{background:#fff;border:1px solid #d8ddd3;padding:22px;border-radius:8px;display:flex;flex-direction:column;min-height:270px;box-shadow:0 8px 18px #173b3510}}.course-top{{display:flex;gap:7px;flex-wrap:wrap}}.tag{{background:#173b35;color:#fff;border-radius:999px;padding:5px 10px;font-size:.75rem;font-weight:800}}.tag.quiet{{background:#e5efe7;color:#173b35}}.course p{{margin:0 0 14px}}.course-meta{{margin-top:auto;color:#7a877d;font-size:.85rem}}.button{{display:inline-block;background:#d86b3b;color:#fff;text-decoration:none;text-align:center;padding:11px 14px;border-radius:6px;font-weight:800;margin-top:16px}}footer{{margin-top:55px;color:#7a877d;font-size:.9rem}}@media(max-width:720px){{.hero{{grid-template-columns:1fr}}}}</style></head><body><header><strong>EDU-TOGO</strong><a href='/docs'>API &amp; docs</a></header><main><section class='hero'><div><div class='eyebrow'>ESPACE ELEVE</div><h1>Choisis ton prochain cours.</h1><p class='intro'>Des lecons courtes, des exemples clairs et un quiz pour progresser a ton rythme. Ouvre un cours pour commencer.</p></div><div class='stats'><strong>{len(courses)}</strong><span>cours disponibles dans le catalogue</span></div></section><section><h2>Tous les cours</h2><div class='courses'>{cards}</div></section><footer>EDU-TOGO &middot; apprendre, comprendre, reussir</footer></main></body></html>"""
+
+
+@app.get("/learn/{course_id}", response_class=HTMLResponse)
+def learn(course_id: int) -> str:
+    with connect() as connection:
+        course = connection.execute("""
+            SELECT c.*, g.name AS grade, s.name AS subject
+            FROM courses c JOIN grades g ON g.id = c.grade_id JOIN subjects s ON s.id = c.subject_id
+            WHERE c.id = ?
+        """, (course_id,)).fetchone()
+        lessons = connection.execute("SELECT id, title, objectives, content, position FROM lessons WHERE course_id = ? ORDER BY position", (course_id,)).fetchall()
+        questions = {}
+        for lesson in lessons:
+            questions[lesson["id"]] = connection.execute("SELECT id, prompt, choices FROM questions WHERE lesson_id = ? ORDER BY id", (lesson["id"],)).fetchall()
+    if course is None:
+        raise HTTPException(status_code=404, detail="Cours introuvable")
+    lesson_blocks = []
+    for lesson in lessons:
+        question_blocks = []
+        for question in questions[lesson["id"]]:
+            options = "".join(f"<label><input type='radio' name='q-{question['id']}' value='{escape(choice)}' required> {escape(choice)}</label>" for choice in question["choices"].split("|"))
+            question_blocks.append(f"<div class='question'><strong>{escape(question['prompt'])}</strong>{options}</div>")
+        lesson_blocks.append(f"<article class='lesson'><span class='lesson-number'>LECON {lesson['position']:02d}</span><h2>{escape(lesson['title'])}</h2><p class='objective'><strong>Objectif :</strong> {escape(lesson['objectives'])}</p><div class='content'>{escape(lesson['content'])}</div><form class='quiz' data-lesson='{lesson['id']}'>{''.join(question_blocks)}<button type='submit'>Valider mes reponses</button><output></output></form></article>")
+    return f"""<!doctype html><html lang='fr'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>{escape(course['title'])} | EDU-TOGO</title><style>:root{{font-family:system-ui,sans-serif;color:#173b35;background:#f7f4ec}}*{{box-sizing:border-box}}body{{margin:0}}header{{background:#173b35;color:#fff;padding:20px max(24px,7vw);display:flex;justify-content:space-between}}header a{{color:#f5d66b;text-decoration:none;font-weight:700}}main{{max-width:900px;margin:auto;padding:42px 24px 80px}}.back{{color:#d86b3b;font-weight:800;text-decoration:none}}.tag{{display:inline-block;background:#e5efe7;border-radius:999px;padding:6px 12px;margin-top:25px;font-size:.8rem;font-weight:800}}h1{{font:clamp(2.4rem,6vw,4.5rem)/.95 Georgia,serif;margin:14px 0}}.lead{{font-size:1.12rem;line-height:1.6;color:#52625a}}.lesson{{background:#fff;border:1px solid #d8ddd3;border-radius:8px;padding:28px;margin:22px 0;box-shadow:0 8px 18px #173b3510}}.lesson-number{{color:#d86b3b;font-size:.75rem;font-weight:900;letter-spacing:.12em}}.lesson h2{{font:2rem Georgia,serif;margin:10px 0}}.objective{{background:#f5d66b33;padding:14px;border-left:4px solid #e9c46a}}.content{{font:1.08rem/1.8 Georgia,serif;white-space:pre-line}}.quiz{{border-top:1px solid #e2e6df;margin-top:24px;padding-top:20px}}.question{{margin:14px 0}}label{{display:block;padding:9px 0;color:#52625a}}button{{background:#d86b3b;color:#fff;border:0;border-radius:6px;padding:11px 14px;font-weight:800;cursor:pointer}}output{{display:block;margin-top:14px;font-weight:800}}@media(max-width:600px){{.lesson{{padding:20px}}}}</style></head><body><header><strong>EDU-TOGO</strong><a href='/'>Tous les cours</a></header><main><a class='back' href='/'>&larr; Retour au catalogue</a><span class='tag'>{escape(course['grade'])} &middot; {escape(course['subject'])}</span><h1>{escape(course['title'])}</h1><p class='lead'>{escape(course['description'])}</p>{''.join(lesson_blocks)}</main><script>document.querySelectorAll('.quiz').forEach(function(form){{form.addEventListener('submit',async function(event){{event.preventDefault();const token=localStorage.getItem('edutogo_token');const output=form.querySelector('output');if(!token){{output.textContent='Connecte-toi dans /docs pour enregistrer ton score.';return}}const answers={{}};form.querySelectorAll('input:checked').forEach(function(input){{answers[input.name.slice(2)]=input.value}});const response=await fetch('/lessons/'+form.dataset.lesson+'/quiz',{{method:'POST',headers:{{'Content-Type':'application/json','Authorization':'Bearer '+token}},body:JSON.stringify({{answers:answers}})}});const result=await response.json();output.textContent=response.ok?'Score : '+result.score+'% ('+result.correct+'/'+result.total+')':'Erreur : '+(result.detail||'reponse impossible')}})}})}});</script></body></html>"""
 
 
 @app.post("/auth/register", status_code=201)
