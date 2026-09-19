@@ -19,7 +19,10 @@ def test_health_and_catalog():
         assert client.get("/health").json()["status"] == "ok"
         catalog = client.get("/catalog")
         assert catalog.status_code == 200
-        assert catalog.json()[0]["title"] == "Comprendre les fractions"
+        assert any(course["title"] == "Comprendre les fractions" for course in catalog.json())
+        assert len(catalog.json()) >= 6
+        assert {subject["name"] for subject in client.get("/subjects").json()} >= {"Mathematiques", "Francais", "Sciences"}
+        assert len(client.get("/grades").json()) >= 5
 
 
 def test_student_can_complete_lesson_and_submit_quiz():
@@ -29,7 +32,9 @@ def test_student_can_complete_lesson_and_submit_quiz():
         login = client.post("/auth/login", json={"email": "afi@example.com", "password": "secret123"})
         token = login.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        lesson = client.get("/lessons/1").json()
+        course = next(course for course in client.get("/catalog").json() if course["title"] == "Comprendre les fractions")
+        lesson = client.get(f"/courses/{course['id']}").json()["lessons"][0]
+        lesson = client.get(f"/lessons/{lesson['id']}").json()
         question_id = lesson["questions"][0]["id"]
         result = client.post(f"/lessons/{lesson['lesson']['id']}/quiz", headers=headers, json={"answers": {str(question_id): "4/5"}})
         assert result.status_code == 200

@@ -6,6 +6,7 @@ MVP de plateforme éducative web et API pour le contexte togolais.
 
 - inscription et connexion élève/enseignant ;
 - catalogue configurable par niveau et matière ;
+- six cours de demonstration : nombres decimaux, fractions, equations, grammaire, ecosystemes et territoires du Togo ;
 - cours, leçons et objectifs pédagogiques ;
 - quiz avec correction détaillée ;
 - progression personnelle ;
@@ -24,6 +25,16 @@ uvicorn app:app --reload
 ```
 
 Ouvrir `http://127.0.0.1:8000/` ou `http://127.0.0.1:8000/docs`.
+
+## API pedagogique
+
+- `GET /grades` liste les niveaux disponibles ;
+- `GET /subjects` liste les matieres disponibles ;
+- `GET /catalog` accepte `grade_id` et `subject` pour filtrer les cours ;
+- `GET /courses/{course_id}` retourne les lecons d'un cours ;
+- `GET /lessons/{lesson_id}` retourne le contenu et les questions ;
+- `POST /lessons/{lesson_id}/quiz` corrige un quiz et enregistre le score ;
+- `GET /progress` retourne la progression de l'utilisateur connecte.
 
 ## Architecture cible par phases
 

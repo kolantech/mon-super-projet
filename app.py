@@ -92,20 +92,121 @@ CREATE TABLE IF NOT EXISTS progress (user_id INTEGER NOT NULL REFERENCES users(i
 """
 
 
+COURSE_CATALOG = (
+    {
+        "grade": ("Primaire", "CM2"),
+        "subject": "Mathematiques",
+        "title": "Les nombres decimaux",
+        "description": "Lire, comparer et calculer avec les nombres decimaux.",
+        "difficulty": "Debutant",
+        "duration": 25,
+        "lessons": (
+            ("Lire un nombre decimal", "Reconnaitre la partie entiere et la partie decimale.", "Un nombre decimal comporte une partie entiere et une partie decimale separees par une virgule.", "Dans 12,45, 12 est la partie entiere et 45 la partie decimale.", "Quelle est la partie entiere de 7,25 ?", "7|25|725", "7", "La partie entiere est situee avant la virgule."),
+            ("Comparer des decimaux", "Comparer des nombres decimaux en utilisant leur valeur de position.", "On compare d'abord les parties entieres, puis les dixiemes et les centiemes si necessaire.", "Entre 3,4 et 3,04, 3,4 est le plus grand car 40 centiemes sont superieurs a 4 centiemes.", "Quel nombre est le plus grand ?", "2,5|2,05|2,005", "2,5", "2,5 vaut 2,500 et depasse les deux autres nombres."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "6e"),
+        "subject": "Mathematiques",
+        "title": "Comprendre les fractions",
+        "description": "Representer, comparer et additionner des fractions simples.",
+        "difficulty": "Debutant",
+        "duration": 25,
+        "lessons": (
+            ("Les fractions, pas a pas", "Identifier le numerateur et le denominateur; comparer deux fractions.", "Une fraction represente une ou plusieurs parts egales d'un tout. Dans 3/4, 3 est le numerateur et 4 le denominateur.", "Quelle fraction est la plus grande entre 2/5 et 4/5 ?", "2/5|4/5|Elles sont egales", "4/5", "Les denominateurs sont identiques : 4 est superieur a 2."),
+            ("Additionner des fractions", "Additionner des fractions de meme denominateur.", "Pour des fractions de meme denominateur, on additionne les numerateurs et on conserve le denominateur.", "2/7 + 3/7 = 5/7.", "Combien font 1/6 + 4/6 ?", "4/6|5/6|5/12", "5/6", "Les numerateurs 1 et 4 donnent 5, avec le denominateur 6."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "5e"),
+        "subject": "Mathematiques",
+        "title": "Equations du premier degre",
+        "description": "Resoudre une equation simple et verifier sa solution.",
+        "difficulty": "Intermediaire",
+        "duration": 30,
+        "lessons": (
+            ("Isoler l'inconnue", "Utiliser les operations inverses pour trouver x.", "Dans x + 4 = 9, on soustrait 4 aux deux membres pour obtenir x = 5.", "Quelle est la solution de x + 6 = 10 ?", "2|4|16", "4", "On soustrait 6 aux deux membres : x = 4."),
+            ("Verifier une equation", "Remplacer l'inconnue par sa valeur et controler l'egalite.", "Une solution est correcte lorsque les deux membres ont la meme valeur apres remplacement.", "Pour 3x = 12, remplacer x par 4 donne 3 x 4 = 12.", "Quelle valeur verifie 2x = 14 ?", "5|7|12", "7", "2 x 7 = 14."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "5e"),
+        "subject": "Francais",
+        "title": "Grammaire et phrase simple",
+        "description": "Identifier le sujet, le verbe et les complements essentiels.",
+        "difficulty": "Debutant",
+        "duration": 25,
+        "lessons": (
+            ("Trouver le verbe", "Identifier le verbe conjugue dans une phrase.", "Le verbe exprime une action ou un etat et varie selon le temps et le sujet.", "Dans 'Les eleves lisent', le verbe conjugue est lisent.", "Quel est le verbe dans 'Afi prepare son devoir' ?", "Afi|prepare|devoir", "prepare", "Prepare indique l'action realisee."),
+            ("Accorder le sujet et le verbe", "Accorder correctement le verbe avec son sujet.", "Le verbe s'accorde avec le sujet en personne et en nombre.", "Les enfants jouent, mais l'enfant joue.", "Quelle phrase est correcte ?", "Les fille chante|Les filles chantent|Les filles chante", "Les filles chantent", "Le sujet filles est au pluriel."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "4e"),
+        "subject": "Sciences",
+        "title": "Les ecosystemes",
+        "description": "Comprendre les relations entre les etres vivants et leur milieu.",
+        "difficulty": "Intermediaire",
+        "duration": 30,
+        "lessons": (
+            ("Le milieu de vie", "Decrire un ecosysteme et ses composantes.", "Un ecosysteme comprend un milieu physique et les etres vivants qui y interagissent.", "Une mare associe de l'eau, des plantes, des animaux et des micro-organismes.", "Quelle composante appartient au milieu physique d'une mare ?", "Une grenouille|La temperature de l'eau|Une algue", "La temperature de l'eau", "La temperature est un facteur physique."),
+            ("Les chaines alimentaires", "Representer le transfert de matiere et d'energie.", "Une chaine alimentaire commence generalement par un producteur puis des consommateurs.", "Herbe -> criquet -> grenouille illustre une chaine alimentaire.", "Quel organisme est producteur ?", "L'herbe|Le criquet|La grenouille", "L'herbe", "Les plantes produisent leur matiere organique."),
+        ),
+    },
+    {
+        "grade": ("Secondaire", "3e"),
+        "subject": "Histoire-Geographie",
+        "title": "Le Togo et ses territoires",
+        "description": "Situer le Togo, ses regions et ses principaux espaces de vie.",
+        "difficulty": "Debutant",
+        "duration": 25,
+        "lessons": (
+            ("Situer le Togo", "Identifier les pays voisins et le golfe de Guinee.", "Le Togo se situe en Afrique de l'Ouest et possede une facade sur le golfe de Guinee.", "Le territoire togolais s'etire du nord au sud entre plusieurs pays voisins.", "Sur quel golfe s'ouvre le Togo ?", "Le golfe de Guinee|Le golfe du Mexique|Le golfe Persique", "Le golfe de Guinee", "Le Togo possede une facade maritime sur le golfe de Guinee."),
+            ("Villes et activites", "Relier les espaces aux activites humaines principales.", "Les villes concentrent des activites administratives, commerciales, industrielles et de services.", "Lome est la capitale et un important centre portuaire et commercial.", "Quelle ville est la capitale du Togo ?", "Kara|Lome|Atakpame", "Lome", "Lome est la capitale du Togo."),
+        ),
+    },
+)
+
+
 def seed_database() -> None:
     with connect() as connection:
         connection.executescript(SCHEMA)
-        if connection.execute("SELECT COUNT(*) FROM grades").fetchone()[0]:
-            return
-        connection.execute("INSERT INTO grades(level, name) VALUES ('Secondaire', '5e')")
-        grade_id = connection.execute("SELECT id FROM grades WHERE name = '5e'").fetchone()[0]
-        connection.execute("INSERT INTO subjects(name) VALUES ('Mathematiques')")
-        subject_id = connection.execute("SELECT id FROM subjects").fetchone()[0]
-        connection.execute("INSERT INTO courses(title, description, grade_id, subject_id, difficulty, duration_minutes) VALUES (?, ?, ?, ?, ?, ?)", ("Comprendre les fractions", "Representer, comparer et additionner des fractions simples.", grade_id, subject_id, "Debutant", 25))
-        course_id = connection.execute("SELECT id FROM courses").fetchone()[0]
-        connection.execute("INSERT INTO lessons(course_id, title, objectives, content, position) VALUES (?, ?, ?, ?, ?)", (course_id, "Les fractions, pas a pas", "Identifier le numerateur et le denominateur; comparer deux fractions.", "Une fraction represente une ou plusieurs parts egales d'un tout. Dans 3/4, 3 est le numerateur et 4 le denominateur. Pour comparer des fractions de meme denominateur, on compare leurs numerateurs.", 1))
-        lesson_id = connection.execute("SELECT id FROM lessons").fetchone()[0]
-        connection.execute("INSERT INTO questions(lesson_id, prompt, choices, answer, explanation) VALUES (?, ?, ?, ?, ?)", (lesson_id, "Quelle fraction est la plus grande entre 2/5 et 4/5 ?", "2/5|4/5|Elles sont egales", "4/5", "Les denominateurs sont identiques : 4 est superieur a 2."))
+        for catalog_course in COURSE_CATALOG:
+            grade_level, grade_name = catalog_course["grade"]
+            connection.execute("INSERT OR IGNORE INTO grades(level, name) VALUES (?, ?)", (grade_level, grade_name))
+            grade_id = connection.execute("SELECT id FROM grades WHERE name = ?", (grade_name,)).fetchone()[0]
+            connection.execute("INSERT OR IGNORE INTO subjects(name) VALUES (?)", (catalog_course["subject"],))
+            subject_id = connection.execute("SELECT id FROM subjects WHERE name = ?", (catalog_course["subject"],)).fetchone()[0]
+            course = connection.execute("SELECT id FROM courses WHERE title = ? AND grade_id = ?", (catalog_course["title"], grade_id)).fetchone()
+            if course is None:
+                cursor = connection.execute(
+                    "INSERT INTO courses(title, description, grade_id, subject_id, difficulty, duration_minutes) VALUES (?, ?, ?, ?, ?, ?)",
+                    (catalog_course["title"], catalog_course["description"], grade_id, subject_id, catalog_course["difficulty"], catalog_course["duration"]),
+                )
+                course_id = cursor.lastrowid
+            else:
+                course_id = course["id"]
+            for position, lesson_data in enumerate(catalog_course["lessons"], start=1):
+                if len(lesson_data) == 7:
+                    lesson_title, objectives, content, question_prompt, choices, answer, explanation = lesson_data
+                    content_detail = ""
+                else:
+                    lesson_title, objectives, content, content_detail, question_prompt, choices, answer, explanation = lesson_data
+                lesson = connection.execute("SELECT id FROM lessons WHERE course_id = ? AND title = ?", (course_id, lesson_title)).fetchone()
+                if lesson is None:
+                    cursor = connection.execute(
+                        "INSERT INTO lessons(course_id, title, objectives, content, position) VALUES (?, ?, ?, ?, ?)",
+                        (course_id, lesson_title, objectives, f"{content} {content_detail}", position),
+                    )
+                    lesson_id = cursor.lastrowid
+                else:
+                    lesson_id = lesson["id"]
+                question = connection.execute("SELECT id FROM questions WHERE lesson_id = ? AND prompt = ?", (lesson_id, question_prompt)).fetchone()
+                if question is None:
+                    connection.execute(
+                        "INSERT INTO questions(lesson_id, prompt, choices, answer, explanation) VALUES (?, ?, ?, ?, ?)",
+                        (lesson_id, question_prompt, choices, answer, explanation),
+                    )
 
 
 @app.on_event("startup")
@@ -152,8 +253,23 @@ def catalog(grade_id: int | None = Query(default=None), subject: str | None = No
     if subject:
         query += " AND lower(s.name) LIKE ?"
         values.append(f"%{subject.lower()}%")
+    query += " ORDER BY c.title"
     with connect() as connection:
         return [dict(row) for row in connection.execute(query, values).fetchall()]
+
+
+@app.get("/grades")
+def grades():
+    with connect() as connection:
+        rows = connection.execute("SELECT id, level, name FROM grades ORDER BY level, name").fetchall()
+    return [dict(row) for row in rows]
+
+
+@app.get("/subjects")
+def subjects():
+    with connect() as connection:
+        rows = connection.execute("SELECT id, name FROM subjects ORDER BY name").fetchall()
+    return [dict(row) for row in rows]
 
 
 @app.get("/courses/{course_id}")
